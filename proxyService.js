@@ -1,7 +1,7 @@
 const http = require('http');
 
 module.exports = (req, res) => {
-  console.log('Proxy:', req.urlObj.href);
+  console.log('Proxy:', req.url);
   const options = {
     hostname: req.urlObj.hostname,
     port:     req.urlObj.port || 80,

@@ -9,7 +9,9 @@ const ifaceName = process.env.IFACE || 'en0';
 const serverIp = os.networkInterfaces()[ifaceName].filter(iface => iface.family === 'IPv4')[0].address;
 
 http.createServer((req, res) => {
-  req.urlObj = url.parse('http://' + req.headers.host + req.url);
+  req.url = req.url || '';
+  const protocol = req.url.length && req.url[0] === '/' ? 'http://' : '';
+  req.urlObj = url.parse(protocol + req.headers.host + req.url);
 
   if ([`localhost:${port}`, `${serverIp}:${port}`].includes(req.urlObj.host)) {
     console.log(req.urlObj.pathname);
