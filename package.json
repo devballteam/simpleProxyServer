@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/devballteam/simpleProxyServer/issues"
   },
-  "homepage": "https://github.com/devballteam/simpleProxyServer#readme"
+  "homepage": "https://github.com/devballteam/simpleProxyServer#readme",
+  "dependencies": {
+    "remarkable": "^1.7.1"
+  }
 }

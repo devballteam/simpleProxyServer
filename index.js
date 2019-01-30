@@ -1,28 +1,31 @@
-const http = require('http');
 const port = process.env.PORT || 3004;
+const http = require('http');
+const os = require('os');
+const url = require('url');
+const servePacFile = require('./servePacFile');
+const serveReadMe = require('./serveReadMe');
+const proxyService = require('./proxyService');
+const ifaceName = process.env.IFACE || 'en0';
+const serverIp = os.networkInterfaces()[ifaceName].filter(iface => iface.family === 'IPv4')[0].address;
 
-http.createServer((clientReq, clientRes) => {
-  const [hostname, reqPort] = clientReq.headers.host.split(':');
+http.createServer((req, res) => {
+  req.urlObj = url.parse('http://' + req.headers.host + req.url);
 
-  console.log('Proxy:', clientReq.headers.host, clientReq.url);
-
-  const options = {
-    hostname,
-    port: reqPort || 80,
-    path: clientReq.url,
-    method: clientReq.method,
-    headers: clientReq.headers
-  };
-
-  if (hostname !== 'localhost') {
-  const proxy = http.request(options, (res) => {
-    clientRes.writeHead(res.statusCode, res.headers)
-    res.pipe(clientRes, { end: true });
-  });
-
-  clientReq.pipe(proxy, { end: true });
+  if ([`localhost:${port}`, `${serverIp}:${port}`].includes(req.urlObj.host)) {
+    console.log(req.urlObj.pathname);
+    switch(req.urlObj.pathname) {
+      case '/':
+        serveReadMe(req, res, serverIp, port)
+        break;
+      case '/pacFile':
+        servePacFile(req, res, serverIp, port)
+        break;
+      default:
+        console.log('Not supported');
+    }
   } else {
-    clientRes.end('Proxy is running on localhost');
+    console.log('Proxy');
+    proxyService(req, res);
   }
 }).listen(port);
-console.log('Proxy started at port:', port);
+console.log(`Proxy is working on: ${serverIp}:${port}`);
